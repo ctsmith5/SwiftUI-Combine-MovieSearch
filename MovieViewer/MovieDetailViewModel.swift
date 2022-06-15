@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Combine
+
 
 
 class MovieDetailViewModel: ObservableObject {
@@ -15,7 +15,6 @@ class MovieDetailViewModel: ObservableObject {
     
     @Published var image: Data?
     
-    var movieImageSubscriber: AnyCancellable?
 
     init(movie: Movie) {
         self.movie = movie
@@ -24,11 +23,6 @@ class MovieDetailViewModel: ObservableObject {
     func fetchImage() {
         let apiClient = APIClient()
         apiClient.fetchImage(for: movie)
-        movieImageSubscriber = apiClient.movieImagePublisher?.sink(receiveCompletion: {
-            print("================================================================")
-            print("IMAGE DATA FOR MOVIE: \(self.movie.name) STATUS: \($0)")
-        }, receiveValue: { imageData in
-            self.image = imageData
-        })
+        
     }
 }
