@@ -20,9 +20,9 @@ class MovieDetailViewModel: ObservableObject {
         self.movie = movie
     }
     
-    func fetchImage() {
+    func fetchImage() async {
         let apiClient = APIClient()
-        apiClient.fetchImage(for: movie)
-        
+        let image = try! await apiClient.fetchImage(for: movie)
+        self.image = image
     }
 }

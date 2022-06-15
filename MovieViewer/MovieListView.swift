@@ -7,26 +7,31 @@
 
 import SwiftUI
 
+
 struct MovieListView: View {
     @State var searchText = ""
     @State var page = 1
-    @ObservedObject var viewModel = MovieListViewModel()
+    @StateObject var viewModel = MovieListViewModel()
     var body: some View {
         VStack {
             ZStack {
                 Rectangle()
                     .foregroundColor(.gray)
+                    .cornerRadius(6)
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .padding(8)
                     TextField("Search For Movies...", text: $searchText)
                         .font(Font.system(size: 24))
+                        .cornerRadius(6)
                 }
                 .background(.white)
-                .padding(12)
+                .padding([.bottom, .top], 8)
+                .padding([.leading, .trailing], 8)
             }
             .frame(height: 24)
-            .padding(24)
+            .padding([.bottom, .top],  24)
+            .padding([.leading, .trailing], 4)
             ScrollView {
                 ForEach(viewModel.movieList) { movie in
                     MovieListCell(viewModel: MovieDetailViewModel(movie: movie))
@@ -34,26 +39,38 @@ struct MovieListView: View {
                 if !viewModel.movieList.isEmpty {
                     Button {
                         page += 1
-                        viewModel.fetchMovies(searchTerm: searchText, page: page)
+                        Task {
+                           await viewModel.fetchMovies(searchTerm: searchText, page: page)
+                        }
                     } label: {
                         Text("Load More")
                     }
                 }
 
             }
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
             .padding([.leading, .trailing], 24)
            
             Spacer()
             Button {
-                viewModel.fetchMovies(searchTerm: searchText, page: page)
+                Task {
+                    await viewModel.fetchMovies(searchTerm: searchText, page: page)
+                }
             } label: {
-                Text("Search")
+                HStack {
+                    Spacer()
+                    Text("Search")
+                        .font(Font.system(size: 24))
+                        .foregroundColor(Color.white)
+                    Spacer()
+                }
             }
-            .frame(width: 200, height: 50)
+            .frame(height: 50)
             .background(Color.blue)
-            .foregroundColor(Color.white)
-            .font(Font.system(size: 24))
-            .padding(.bottom, 24)
+            .cornerRadius(6)
+            .padding([.bottom, .leading, .trailing], 24)
 
         }
         
@@ -61,7 +78,7 @@ struct MovieListView: View {
 }
 
 struct MovieListCell: View {
-   @ObservedObject var viewModel: MovieDetailViewModel
+    @ObservedObject var viewModel: MovieDetailViewModel
     var body: some View {
         HStack {
             Image(uiImage: ((UIImage(data: viewModel.image ?? Data()) ?? UIImage(systemName: "exclamationmark.icloud.fill"))!))
@@ -72,7 +89,9 @@ struct MovieListCell: View {
             Spacer()
         }
         .onAppear {
-            viewModel.fetchImage()
+            Task {
+               await viewModel.fetchImage()
+            }
         }
         .frame(height: 150)
     }

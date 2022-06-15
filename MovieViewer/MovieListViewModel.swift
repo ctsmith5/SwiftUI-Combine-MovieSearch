@@ -14,10 +14,9 @@ class MovieListViewModel: ObservableObject {
     
     
     
-    func fetchMovies(searchTerm: String, page: Int?) {
+    func fetchMovies(searchTerm: String, page: Int?) async {
         let apiClient = APIClient()
-        apiClient.fetchMovies(searchTerm: searchTerm)
-        
-       
+        let movies = await apiClient.fetchMovies(searchTerm: searchTerm)
+        self.movieList = movies
     }
 }
